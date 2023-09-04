@@ -1,0 +1,72 @@
+HELP.md
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
+.vscode/
+
+### backend ###
+
+
+# dependencies
+./front/node_modules
+./front/.pnp
+./front/.pnp.js
+
+# testing
+./front/coverage
+
+# next.js
+./front/.next/
+./front/out/
+
+# production
+./front/build
+
+# misc
+./front/.DS_Store
+./front/*.pem
+
+# debug
+./front/npm-debug.log*
+./front/yarn-debug.log*
+./front/yarn-error.log*
+
+# local env files
+./front/.env*.local
+
+# vercel
+./front/.vercel
+
+# typescript
+./front/*.tsbuildinfo
+./front/next-env.d.ts
+
+### front ###

@@ -6,7 +6,8 @@
     "dev": "env-cmd -f ./config/.env.local next dev",
     "build": "env-cmd -f ./config/.env.prod next build && next export",
     "start": "env-cmd -f ./config/.env.dev next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "clean": "npm cache clean --force && npm i"
   },
   "dependencies": {
     "@redux-devtools/extension": "^3.2.5",

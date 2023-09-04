@@ -28,7 +28,10 @@ function ListPage() {
   const { type } = router.query;
 
   const videoRef = useRef<any>(null);
-  const [listHeight, setListHeight] = useState(0);
+  const [wrap, setWrap] = useState({
+    current: 0,
+    last: 0
+  });
   const [isLoading, setIsLoading] = useState(true);
   // react-player option
   const [playState, setPlayState] = useState({
@@ -213,6 +216,10 @@ function ListPage() {
         ...section,
         lastIdx: _.head(playGroundList).section.length - 1
       });
+      // 콘텐츠 목록 길이 / 4로 wrap 나눔
+      setWrap((wrap) => {
+        return { ...wrap, last: Math.ceil(playGroundList.length / 4) };
+      });
     } else if (
       type === process.env.NEXT_PUBLIC_BTN_SONG ||
       currentMenu === process.env.NEXT_PUBLIC_BTN_SONG
@@ -227,6 +234,9 @@ function ListPage() {
         ...section,
         lastIdx: _.head(songList).section.length - 1
       });
+      setWrap((wrap) => {
+        return { ...wrap, last: Math.ceil(songList.length / 4) };
+      });
     } else if (
       type === process.env.NEXT_PUBLIC_BTN_STUDIO ||
       currentMenu === process.env.NEXT_PUBLIC_BTN_STUDIO
@@ -237,6 +247,9 @@ function ListPage() {
       });
       setContentsIdx({ idx: 0, lastIdx: streamingList.length - 1 });
       setContents(_.head(streamingList));
+      setWrap((wrap) => {
+        return { ...wrap, last: Math.ceil(streamingList.length / 4) };
+      });
     }
   }, [type, currentMenu]);
 
@@ -296,29 +309,25 @@ function ListPage() {
           : contentsIdx.idx + 1;
     }
 
-    setContentsIdx({ ...contentsIdx, idx: findIdx });
+    setContentsIdx(() => {
+      return { ...contentsIdx, idx: findIdx };
+    });
     const el = document.getElementById(`focus${findIdx}`);
 
     if (el === null) {
       return;
     }
 
-    // contents list를 감싼 div의 높이값
-    const wrapperEl = document.getElementById("contents-list-wrapper");
-    if (wrapperEl != null) {
-      const wrapperHeight =
-        listHeight === 0 ? wrapperEl.offsetHeight : listHeight;
-      const focusPosition = el.offsetHeight * (findIdx + 1);
-
-      if (
-        (isPrev && focusPosition <= wrapperHeight + focusPosition) ||
-        (!isPrev && focusPosition >= wrapperHeight)
-      ) {
-        el.scrollIntoView();
-        setListHeight(() => {
-          return wrapperEl.offsetHeight + focusPosition;
-        });
+    const nowWrap = Math.floor(findIdx / 4) + 1;
+    const currentWrap = wrap.current === 0 ? 1 : wrap.current;
+    // 선택한 콘텐츠가 이전에 선택된 콘텐츠의 wrap과 다를 경우 scroll foucs 이동
+    if (currentWrap != nowWrap) {
+      const targetIdx = isPrev ? findIdx - 3 : findIdx;
+      const firstWrapEl = document.getElementById(`focus${targetIdx}`);
+      if (firstWrapEl != null) {
+        firstWrapEl.scrollIntoView();
       }
+      setWrap({ ...wrap, current: nowWrap });
     }
     // click event 강제 발생
     el.dispatchEvent(new Event("click", { bubbles: true }));
@@ -327,8 +336,8 @@ function ListPage() {
   function selectContents(params: ContentsObj) {
     setContents(params);
     setPlayState({ ...playState, volume: 0 });
-    // 노래교실일 경우 section 정보 추가
-    if (page.pageTy === "SO" && params.section !== undefined) {
+    // 메뉴2일 경우 section 정보 추가
+    if (page.pageTy === "song" && params.section !== undefined) {
       setSection({ ...section, lastIdx: params.section?.length - 1 });
     }
 
@@ -352,7 +361,7 @@ function ListPage() {
   }
 
   const contentsListRender = () => {
-    if (page.pageTy === "PL") {
+    if (page.pageTy === "play") {
       return (
         <ul>
           {playGroundList.map((s: ContentsObj, idx: number) => (
@@ -362,27 +371,17 @@ function ListPage() {
               className={contentsIdx.idx === idx ? "active" : ""}
               id={`focus${idx}`}
             >
-              <a>
-                <div className="">
-                  <dl>
-                    <dt className="subject">
-                      <p
-                        className={
-                          "track" +
-                          (s.title.length > 5 ? " long_title" : " short_title")
-                        }
-                      >
-                        {s.title}
-                      </p>
-                    </dt>
-                  </dl>
-                </div>
-              </a>
+              <div className="list-item">
+                <dl>
+                  <dt className="date">{s.title}</dt>
+                  <dd className="status"></dd>
+                </dl>
+              </div>
             </li>
           ))}
         </ul>
       );
-    } else if (page.pageTy === "SO") {
+    } else if (page.pageTy === "song") {
       return (
         <ul>
           {songList.map((s: ContentsObj, idx: number) => (
@@ -392,24 +391,21 @@ function ListPage() {
               className={contentsIdx.idx === idx ? "active" : ""}
               id={`focus${idx}`}
             >
-              <a>
-                <div className="">
-                  <dl>
-                    <dt className="subject">
-                      <p
-                        className={
-                          "track" +
-                          (s.title.length > 5 ? " long_title" : " short_title")
-                        }
-                      >
-                        {s.title}
-                      </p>
-                    </dt>
-                    <dd className="name">{s.singer}</dd>
-                    <dd className="album">{s.album}</dd>
-                  </dl>
-                </div>
-              </a>
+              <div className="list-item">
+                <dl>
+                  <dt className="subject">
+                    <p
+                      className={
+                        "track" + (s.title.length > 7 ? " long-title" : "")
+                      }
+                    >
+                      {s.title}
+                    </p>
+                  </dt>
+                  <dd className="name">{s.singer}</dd>
+                  <dd className="album">{s.album}</dd>
+                </dl>
+              </div>
             </li>
           ))}
         </ul>
@@ -424,22 +420,12 @@ function ListPage() {
               className={contentsIdx.idx === idx ? "active" : ""}
               id={`focus${idx}`}
             >
-              <a>
-                <div className="">
-                  <dl>
-                    <dt className="subject">
-                      <p
-                        className={
-                          "track" +
-                          (s.title.length > 5 ? " long_title" : " short_title")
-                        }
-                      >
-                        {s.title}
-                      </p>
-                    </dt>
-                  </dl>
-                </div>
-              </a>
+              <div className="list-item">
+                <dl>
+                  <dt className="date">{s.title}</dt>
+                  <dd className="status"></dd>
+                </dl>
+              </div>
             </li>
           ))}
         </ul>
@@ -447,16 +433,46 @@ function ListPage() {
     }
   };
 
+  // NOTE: 1 wrap 기준 : 4개
+  function isShowPrevArrow(idx: number) {
+    const nowWrap = Math.floor(idx / 4) + 1;
+    return nowWrap > 1;
+  }
+
+  function isShowNextArrow(idx: number) {
+    const nowWrap = Math.floor(idx / 4) + 1;
+    if (wrap.last === nowWrap) {
+      // 마지막 wrap일 경우
+      return false;
+    } else if (wrap.last > nowWrap) {
+      // 현재 wrap이 마지막 wrap의 직전 wrap일 경우
+      // 마지막 wrap의 콘텐츠 갯수가 2개 이하이면 arrow 표시 false
+      return wrap.last - 1 === nowWrap
+        ? wrap.last * 4 - (contentsIdx.lastIdx + 1) <= 2
+        : true;
+    }
+  }
+
   if (isLoading) return <div>로딩중입니다.</div>;
 
   return (
     <main className="main-sub">
-      <div className="lnb lnb-song">
+      <div className={`lnb lnb-${page.pageTy}`}>
         <h2>
           <span>{page.pageNm}</span>
         </h2>
         <div className="list" id="contents-list-wrapper">
           {contentsListRender()}
+          <div
+            className={
+              "arrow-prev" + (isShowPrevArrow(contentsIdx.idx) ? " more" : "")
+            }
+          ></div>
+          <div
+            className={
+              "arrow-next" + (isShowNextArrow(contentsIdx.idx) ? " more" : "")
+            }
+          ></div>
         </div>
       </div>
       <div className="main-container">

@@ -53,6 +53,7 @@ export default function Main() {
       controlMenu();
     }
   }
+
   // 메뉴 컨트롤
   function controlMenu() {
     let findIdx = 0;

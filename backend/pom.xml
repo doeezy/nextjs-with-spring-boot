@@ -79,7 +79,7 @@
                 <version>1.6.0</version>
                 <executions>
                     <execution>
-                        <id>font-end install</id>
+                        <id>font-end cache clean and install</id>
                         <goals>
                             <goal>exec</goal>
                         </goals>
@@ -87,10 +87,24 @@
                         <configuration>
                             <executable>npm</executable>
                             <arguments>
-                                <argument>install</argument>
+                                <argument>run</argument>
+                                <argument>clean</argument>
                             </arguments>
                         </configuration>
                     </execution>
+<!--                    <execution>-->
+<!--                        <id>font-end install</id>-->
+<!--                        <goals>-->
+<!--                            <goal>exec</goal>-->
+<!--                        </goals>-->
+<!--                        <phase>prepare-package</phase>-->
+<!--                        <configuration>-->
+<!--                            <executable>npm</executable>-->
+<!--                            <arguments>-->
+<!--                                <argument>install</argument>-->
+<!--                            </arguments>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
                     <!--                    <execution>-->
                     <!--                        <id>font-end unit test</id>-->
                     <!--                        <goals>-->
@@ -134,7 +148,7 @@
                         <configuration>
                             <target>
                                 <copy todir="./target/classes/public">
-                                    <fileset dir="../front/out"/>
+                                    <fileset dir="../front/build"/>
                                 </copy>
                             </target>
                         </configuration>

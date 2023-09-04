@@ -1,4 +1,3 @@
-import "@/styles/common.css";
 import "@/styles/style.css";
 import type { AppProps } from "next/app";
 import Header from "@/components/Header";

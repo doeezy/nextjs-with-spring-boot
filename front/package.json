@@ -4,7 +4,7 @@
   "private": false,
   "scripts": {
     "dev": "env-cmd -f ./config/.env.local next dev",
-    "build": "env-cmd -f ./config/.env.prod next build && next export",
+    "build": "env-cmd -f ./config/.env.prod next build && next export -o build/",
     "start": "env-cmd -f ./config/.env.dev next start",
     "lint": "next lint",
     "clean": "npm cache clean --force && npm i"
